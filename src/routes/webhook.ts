@@ -1,18 +1,18 @@
 import { Elysia, t } from 'elysia';
 
-export const health = new Elysia({ prefix: '/health' }).get(
+export const webhook = new Elysia({ prefix: '/webhook' }).post(
   '/',
   () => ({
-    status: 'ok from health',
+    status: 'ok from webhook',
     timestamp: new Date().toISOString(),
   }),
   {
     detail: {
-      tags: ['Health'],
-      description: 'Health check endpoint',
+      tags: ['Webhook'],
+      description: 'Webhook endpoint',
       responses: {
         200: {
-          description: 'Successful health check response',
+          description: 'Successful webhook response',
           content: {
             'application/json': {
               schema: t.Object({

@@ -7,10 +7,13 @@
   },
   "dependencies": {
     "@elysiajs/swagger": "^1.1.6",
+    "@line/bot-sdk": "^9.5.0",
     "elysia": "latest"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "@types/prettier": "^3.0.0",
+    "bun-types": "latest",
+    "prettier": "^3.4.2"
   },
   "module": "src/index.js"
 }
