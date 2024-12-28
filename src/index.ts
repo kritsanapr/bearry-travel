@@ -1,18 +1,11 @@
 import { Elysia } from 'elysia';
-import { middleware as lineMiddleware, Client } from '@line/bot-sdk';
-
-// Middleware and configure
 import { swagger } from '@elysiajs/swagger';
 import { logger } from './middleware/logger';
 import { appConfig } from './config/app.config';
 
-// Handlers
+// Routes
 import { webhook } from './routes/webhook';
 import { health } from './routes/health';
-
-const client = new Client({
-  channelAccessToken: appConfig.channelAccessToken,
-});
 
 const app = new Elysia()
   .use(
@@ -35,3 +28,5 @@ const app = new Elysia()
 console.log(
   `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`
 );
+
+export type App = typeof app;
