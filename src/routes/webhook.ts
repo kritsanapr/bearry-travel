@@ -1,6 +1,10 @@
 import { Elysia, t } from 'elysia';
 import { lineClient } from '../config/line.config';
-import { createResponse, createErrorResponse } from '../utils/response';
+import {
+  createResponse,
+  createErrorResponse,
+  formatAgenda,
+} from '../utils/response';
 import { getJPYToTHBRate } from '../services/exchange.service';
 import { findNearbyRestaurants } from '../services/places.service';
 import {
@@ -9,6 +13,7 @@ import {
   getOpenAIResponse,
   getOpenAIVisionResponse,
 } from '../services/ai.service';
+import { AGENDA } from '../constants';
 
 // LINE Webhook Interfaces
 import {
@@ -16,17 +21,18 @@ import {
   LineEvent,
   LineMessage,
 } from '../types/line-event.interface';
+import axios from 'axios';
 
 // Message Handlers
 async function handleExchangeRate(event: LineEvent) {
   try {
     const text = event.message?.text || '';
-    const match = text.match(/(\d+)\s*(円|¥|JPY)/i);
+    const match = text.match(/(\d+)\s*(円|¥|JPY|เยน)/i);
 
     if (!match) {
       await lineClient.replyMessage(event.replyToken, {
         type: 'text',
-        text: 'กรุณาระบุจำนวนเงินเยนที่ต้องการแปลง เช่น "1000円" หรือ "1000 JPY"',
+        text: 'กรุณาระบุจำนวนเงินเยนที่ต้องการแปลง เช่น "1000円" หรือ "1000 JPY หรือ "1000 เยน""',
       });
       return;
     }
@@ -81,6 +87,18 @@ async function handleRestaurantSearch(event: LineEvent) {
       text: 'ขออภัย ไม่สามารถค้นหาร้านอาหารได้ในขณะนี้',
     });
   }
+}
+
+async function loading(userId: string) {
+  return axios({
+    method: 'post',
+    url: 'https://api.line.me/v2/bot/chat/loading/start',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.CHANNEL_ACCESS_TOKEN}`,
+    },
+    data: { chatId: userId, loadingSeconds: 10 },
+  });
 }
 
 async function handleAIQuery(event: LineEvent) {
@@ -166,6 +184,7 @@ export const webhook = new Elysia().post(
       console.log('Received webhook body:', body.events);
 
       const events = body.events;
+      const userId = body.events[0].source.userId;
 
       if (!events || !Array.isArray(events)) {
         console.error('Invalid events format:', events);
@@ -173,11 +192,12 @@ export const webhook = new Elysia().post(
       }
 
       for (const event of events) {
+        await loading(userId);
         if (event.type === 'message') {
           if (event.message?.type === 'text') {
             const text = event.message?.text?.toLowerCase() ?? '';
 
-            if (text.match(/(円|¥|jpy)/i)) {
+            if (text.match(/(円|¥|jpy|เยน)/i)) {
               await handleExchangeRate(event);
             } else if (
               text.includes('ร้านอาหาร') ||
@@ -186,6 +206,22 @@ export const webhook = new Elysia().post(
               await lineClient.replyMessage(event.replyToken, {
                 type: 'text',
                 text: 'กรุณาแชร์ตำแหน่งที่ตั้งของคุณเพื่อค้นหาร้านอาหารใกล้เคียง',
+              });
+            } else if (text.includes('แพลน') || text.includes('plan')) {
+              // Handle planning
+              const tripAgenda = AGENDA['Tokyo Trip 2025'];
+              await lineClient.replyMessage(event.replyToken, {
+                type: 'text',
+                text: formatAgenda(tripAgenda),
+              });
+            } else if (
+              text.includes('แพลนวันที่') ||
+              text.includes('แพลนวัน')
+            ) {
+              const tripAgenda = AGENDA['Tokyo Trip 2025'];
+              await lineClient.replyMessage(event.replyToken, {
+                type: 'text',
+                text: formatAgenda(tripAgenda),
               });
             } else {
               await handleAIQuery(event);

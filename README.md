@@ -20,7 +20,7 @@ API Integration: Gemini API for real-time internet access.
 Security
 Tokens and port numbers stored securely using .env files.
 Encrypted communication and database protection.
-This chatbot combines practicality with innovation, making it a perfect travel assistant. 🚀
+This chatbot combines practicality with innovation, making it a perfect travel assistant. 
 
 ## Getting Started
 
@@ -45,18 +45,28 @@ Open http://localhost:3000/ with your browser to see the result.
 ```
 src/
 ├── config/
-│   └── app.config.ts         # Application configuration
+│   ├── app.config.ts         # Application configuration
+│   └── line.config.ts        # LINE bot configuration
+├── constants/                # Application constants
 ├── controllers/
-│   └── healthController.ts    # Logic for health check
+│   └── healthController.ts   # Logic for health check
+├── interfaces/              # Interface definitions
 ├── middleware/
-│   └── logger.ts              # Request logging middleware
+│   └── logger.ts            # Request logging middleware
+├── models/                  # Database models
 ├── routes/
-│   └── health.ts              # Health check route
+│   ├── health.ts           # Health check route
+│   └── webhook.ts          # LINE webhook handler
+├── services/
+│   ├── ai.service.ts       # AI service integration (Gemini, OpenAI)
+│   ├── exchange.service.ts # Currency exchange service
+│   └── places.service.ts   # Places and location service
 ├── types/
-│   └── index.ts               # TypeScript type definitions
+│   ├── index.ts            # Type definitions exports
+│   └── line-event.interface.ts # LINE webhook event types
 ├── utils/
-│   └── response.ts            # Utility functions for API responses
-└── index.ts                   # Main application entry point
+│   └── response.ts         # Utility functions for API responses
+└── index.ts               # Main application entry point
 ```
 
 ## Documentation

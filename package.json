@@ -9,6 +9,7 @@
     "@elysiajs/swagger": "^1.1.6",
     "@google/generative-ai": "^0.21.0",
     "@line/bot-sdk": "^9.5.0",
+    "axios": "^1.7.9",
     "elysia": "latest",
     "openai": "^4.77.0"
   },

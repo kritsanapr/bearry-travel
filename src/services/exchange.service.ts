@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { appConfig } from '../config/app.config';
 
 export interface ExchangeRate {
   rate: number;
@@ -7,10 +8,9 @@ export interface ExchangeRate {
 
 export async function getJPYToTHBRate(): Promise<ExchangeRate> {
   try {
-    // Using Exchange Rate API (https://exchangerate-api.com/)
-    const response = await axios.get(
-      `https://v6.exchangerate-api.com/v6/${process.env.EXCHANGE_RATE_API_KEY}/pair/JPY/THB`
-    );
+    const url = `https://v6.exchangerate-api.com/v6/${appConfig.exchangeRateApiKey}/pair/JPY/THB`;
+
+    const response = await axios.get(url);
 
     return {
       rate: response.data.conversion_rate,
@@ -18,6 +18,6 @@ export async function getJPYToTHBRate(): Promise<ExchangeRate> {
     };
   } catch (error) {
     console.error('Error fetching exchange rate:', error);
-    throw new Error('Failed to fetch exchange rate');
+    throw error;
   }
 }
