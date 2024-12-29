@@ -7,10 +7,17 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+async function fetchExternalData(url: string) {
+  const response = await fetch(url);
+  return response.json();
+}
+
 // Text-only response using Gemini
 export async function getGeminiResponse(prompt: string): Promise<string> {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    // const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    // const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text();
@@ -21,14 +28,17 @@ export async function getGeminiResponse(prompt: string): Promise<string> {
 }
 
 // Image and text analysis using Gemini Vision
-export async function getGeminiVisionResponse(imageUrl: string, prompt: string): Promise<string> {
+export async function getGeminiVisionResponse(
+  imageUrl: string,
+  prompt: string
+): Promise<string> {
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-pro-vision' });
-    
+
     // Fetch the image
     const imageResponse = await fetch(imageUrl);
     const imageData = await imageResponse.arrayBuffer();
-    
+
     // Convert to base64
     const base64Image = Buffer.from(imageData).toString('base64');
     const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
@@ -38,11 +48,11 @@ export async function getGeminiVisionResponse(imageUrl: string, prompt: string):
       {
         inlineData: {
           data: base64Image,
-          mimeType
-        }
-      }
+          mimeType,
+        },
+      },
     ]);
-    
+
     const response = await result.response;
     return response.text();
   } catch (error) {
@@ -59,7 +69,8 @@ export async function getOpenAIResponse(prompt: string): Promise<string> {
       messages: [
         {
           role: 'system',
-          content: 'You are a helpful assistant that provides information about Japan, including travel tips, cultural insights, and local recommendations.',
+          content:
+            'You are a helpful assistant that provides information about Japan, including travel tips, cultural insights, and local recommendations.',
         },
         {
           role: 'user',
@@ -78,20 +89,24 @@ export async function getOpenAIResponse(prompt: string): Promise<string> {
 }
 
 // Image and text analysis using OpenAI Vision
-export async function getOpenAIVisionResponse(imageUrl: string, prompt: string): Promise<string> {
+export async function getOpenAIVisionResponse(
+  imageUrl: string,
+  prompt: string
+): Promise<string> {
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-4-vision-preview',
       messages: [
         {
           role: 'system',
-          content: 'You are a helpful assistant that analyzes images and provides information about Japan, including travel spots, food, and cultural elements.',
+          content:
+            'You are a helpful assistant that analyzes images and provides information about Japan, including travel spots, food, and cultural elements.',
         },
         {
           role: 'user',
           content: [
             { type: 'text', text: prompt },
-            { type: 'image_url', image_url: { url: imageUrl } }
+            { type: 'image_url', image_url: { url: imageUrl } },
           ],
         },
       ],

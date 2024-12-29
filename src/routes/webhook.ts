@@ -13,6 +13,8 @@ import {
   getOpenAIResponse,
   getOpenAIVisionResponse,
 } from '../services/ai.service';
+import { getWeatherForecast } from '../services/weather.service';
+import { getUserLocation } from '../services/location.service';
 import { AGENDA } from '../constants';
 
 // LINE Webhook Interfaces
@@ -85,6 +87,37 @@ async function handleRestaurantSearch(event: LineEvent) {
     await lineClient.replyMessage(event.replyToken, {
       type: 'text',
       text: 'ขออภัย ไม่สามารถค้นหาร้านอาหารได้ในขณะนี้',
+    });
+  }
+}
+
+async function handleWeatherForecast(event: LineEvent) {
+  try {
+    // get current location from user
+    const userLocation = await getUserLocation(event.source.userId);
+    if (!userLocation) {
+      await lineClient.replyMessage(event.replyToken, {
+        type: 'text',
+        text: 'กรุณาแชร์ตำแหน่งที่ตั้งของคุณเพื่อดูพยากรณ์อากาศ',
+      });
+      return;
+    }
+
+    console.log(userLocation);
+
+    const forecast = await getWeatherForecast(
+      userLocation.latitude,
+      userLocation.longitude
+    );
+    await lineClient.replyMessage(event.replyToken, {
+      type: 'text',
+      text: `พยากรณ์อากาศ:\n🌡️ อุณหภูมิ: ${forecast.temp}°C\n💨 ความเร็วลม: ${forecast.windSpeed} m/s\n💧 ความชื้น: ${forecast.humidity}%\n🌤️ สภาพอากาศ: ${forecast.description}\n\nอัพเดทล่าสุด: ${new Date().toLocaleString('th-TH')}`,
+    });
+  } catch (error) {
+    console.error('Weather forecast error:', error);
+    await lineClient.replyMessage(event.replyToken, {
+      type: 'text',
+      text: 'ขออภัย ไม่สามารถดึงข้อมูลพยากรณ์อากาศได้ในขณะนี้',
     });
   }
 }
@@ -203,6 +236,7 @@ export const webhook = new Elysia().post(
               text.includes('ร้านอาหาร') ||
               text.includes('restaurant')
             ) {
+              await handleRestaurantSearch(event);
               await lineClient.replyMessage(event.replyToken, {
                 type: 'text',
                 text: 'กรุณาแชร์ตำแหน่งที่ตั้งของคุณเพื่อค้นหาร้านอาหารใกล้เคียง',
@@ -223,6 +257,14 @@ export const webhook = new Elysia().post(
                 type: 'text',
                 text: formatAgenda(tripAgenda),
               });
+            }
+            if (
+              text.includes('weather') ||
+              text.includes('forecast') ||
+              text.includes('พยากรณ์') ||
+              text.includes('อากาศ')
+            ) {
+              await handleWeatherForecast(event);
             } else {
               await handleAIQuery(event);
             }
