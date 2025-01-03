@@ -15,29 +15,44 @@ export const createErrorResponse = (message: string, code: number = 400) => {
 };
 
 interface AgendaEvent {
-  time?: string;
+  time: string;
   description: string;
+  recommendations?: string[];
+  destinations?: string[];
 }
 
 interface AgendaDay {
-  title?: string;
+  date: string;
   events: AgendaEvent[];
 }
 
-interface AgendaTrip {
-  [date: string]: AgendaDay;
-}
+type AgendaTrip = AgendaDay[];
 
 interface Agenda {
   [tripName: string]: AgendaTrip;
 }
 
 export function formatAgenda(agenda: AgendaTrip): string {
-  return Object.entries(agenda).map(([date, day]) => {
-    const dayInfo = `📅 ${date}\n${day.title ? `🗓 ${day.title}\n` : ''}`;
-    const events = day.events.map(event => 
-      `${event.time ? `⏰ ${event.time}\n` : ''}📝 ${event.description}`
-    ).join('\n\n');
-    return dayInfo + events;
-  }).join('\n\n-------------------\n\n');
+  return agenda
+    .map(day => {
+      const dayInfo = `📅 ${day.date}\n`;
+      const events = day.events
+        .map(event => {
+          let eventText = `⏰ ${event.time} - ${event.description}`;
+          
+          if (event.recommendations?.length) {
+            eventText += '\n🔍 Recommendations:\n' + event.recommendations.map(r => `  • ${r}`).join('\n');
+          }
+          
+          if (event.destinations?.length) {
+            eventText += '\n📍 Destinations:\n' + event.destinations.map(d => `  • ${d}`).join('\n');
+          }
+          
+          return eventText;
+        })
+        .join('\n\n');
+
+      return `${dayInfo}\n${events}`;
+    })
+    .join('\n\n---\n\n');
 }

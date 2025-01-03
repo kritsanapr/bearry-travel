@@ -8,6 +8,7 @@ import {
 } from '../handlers';
 import { AGENDA } from '../constants';
 import { formatAgenda } from '../utils/response';
+import { createAgendaFlexMessage } from '../utils/flex-message';
 
 export const webhookController = async (
   events: LineEvent[],
@@ -29,7 +30,7 @@ export const webhookController = async (
             type: 'text',
             text: 'กรุณาแชร์ตำแหน่งที่ตั้งของคุณเพื่อค้นหาร้านอาหารใกล้เคียง',
           });
-        } else if (text.includes('แพลน') || text.includes('plan')) {
+        } else if (text.includes('agenda') || text.includes('แพลนทั้งหมด')) {
           const tripAgenda = AGENDA['Tokyo Trip 2025'];
           await lineClient.replyMessage(event.replyToken, {
             type: 'text',
@@ -37,10 +38,36 @@ export const webhookController = async (
           });
         } else if (text.includes('แพลนวันที่') || text.includes('แพลนวัน')) {
           const tripAgenda = AGENDA['Tokyo Trip 2025'];
-          await lineClient.replyMessage(event.replyToken, {
-            type: 'text',
-            text: formatAgenda(tripAgenda),
-          });
+
+          // Extract date from message (e.g., "แพลนวันที่ 15" or "แพลนวัน 15/01")
+          const dateMatch = text.match(/(\d{1,2})(?:\/\d{1,2})?/);
+
+          if (dateMatch) {
+            const dayNumber = dateMatch[1];
+            const targetDate = `${dayNumber}/01/2025`;
+
+            // Find the specific day's agenda
+            const dayAgenda = tripAgenda.find(day =>
+              day.date.startsWith(dayNumber.padStart(2, '0'))
+            );
+
+            if (dayAgenda) {
+              await lineClient.replyMessage(
+                event.replyToken,
+                createAgendaFlexMessage([dayAgenda]) // Pass as single-day array
+              );
+            } else {
+              await lineClient.replyMessage(event.replyToken, {
+                type: 'text',
+                text: `ไม่พบแผนการเดินทางสำหรับวันที่ ${targetDate} กรุณาลองใหม่อีกครั้ง`,
+              });
+            }
+          } else {
+            await lineClient.replyMessage(event.replyToken, {
+              type: 'text',
+              text: 'กรุณาระบุวันที่ที่ต้องการดูแผนการเดินทาง เช่น "แพลนวันที่ 15" หรือ "แพลนวัน 15/01"',
+            });
+          }
         } else if (
           text.includes('weather') ||
           text.includes('forecast') ||
