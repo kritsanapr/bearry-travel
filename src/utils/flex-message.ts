@@ -2,6 +2,16 @@ import { AgendaEvent, AgendaDay, AgendaTrip } from '../types/agenda.interface';
 
 import { FlexBubble, FlexBox, FlexMessage } from '@line/bot-sdk/dist/types';
 
+const formatFullDate = (dateStr: string): string => {
+  const [day, month, year] = dateStr.split('/');
+  const thaiMonths = [
+    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+  ];
+  const monthIndex = parseInt(month) - 1;
+  return `${parseInt(day)} ${thaiMonths[monthIndex]} ${year}`;
+};
+
 const createEventComponent = (event: AgendaEvent): FlexBox => {
   const recommendationBox: FlexBox | undefined = event.recommendations?.length
     ? {
@@ -115,7 +125,7 @@ const createDayBubble = (day: AgendaDay): FlexBubble => {
       contents: [
         {
           type: 'text',
-          text: day.date,
+          text: `📅 วันที่ ${formatFullDate(day.date)}`,
           weight: 'bold',
           size: 'lg',
           color: '#ffffff',
@@ -154,7 +164,7 @@ export const createAgendaFlexMessage = (agenda: AgendaTrip): FlexMessage => {
     type: 'flex',
     altText:
       agenda.length === 1
-        ? `แผนการเดินทางวันที่ ${agenda[0].date}`
+        ? `แผนการเดินทางวันที่ ${formatFullDate(agenda[0].date)}`
         : 'แผนการเดินทางทั้งหมด',
     contents:
       agenda.length === 1

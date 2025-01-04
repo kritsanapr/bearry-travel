@@ -9,6 +9,10 @@ import {
 import { AGENDA } from '../constants';
 import { formatAgenda } from '../utils/response';
 import { createAgendaFlexMessage } from '../utils/flex-message';
+import {
+  createQuickReplyDateMessage,
+  createQuickReplyMessage,
+} from '../utils/quick-reply';
 
 export const webhookController = async (
   events: LineEvent[],
@@ -32,10 +36,13 @@ export const webhookController = async (
           });
         } else if (text.includes('agenda') || text.includes('แพลนทั้งหมด')) {
           const tripAgenda = AGENDA['Tokyo Trip 2025'];
-          await lineClient.replyMessage(event.replyToken, {
-            type: 'text',
-            text: formatAgenda(tripAgenda),
-          });
+          await lineClient.replyMessage(event.replyToken, [
+            {
+              type: 'text',
+              text: formatAgenda(tripAgenda),
+            },
+            createQuickReplyDateMessage(),
+          ]);
         } else if (text.includes('แพลนวันที่') || text.includes('แพลนวัน')) {
           const tripAgenda = AGENDA['Tokyo Trip 2025'];
 
