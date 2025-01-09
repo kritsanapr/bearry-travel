@@ -6,21 +6,47 @@ A LINE chatbot built to enhance travel convenience and enjoyment. Powered by Bun
 
 ## Features
 
-Trip Planning: Manage and display travel agendas.
-Currency Exchange: Get live THB ↔ JPY exchange rates using Gemini API.
-Nearby Locations: Find maps and popular spots around you.
-Rich Menu: Interactive options for easy navigation.
-Reminders: Notify users when to move to their next destination.
-Animations: Enhance user experience during wait times.
-Tech Stack
-Backend: Elysia.js (via Bun) for webhooks and APIs.
-Frontend: Next.js 15 (App Router).
-Database: Postgres DB for secure data storage.
-API Integration: Gemini API for real-time internet access.
-Security
+- **Rich Menu Integration**:
+  - Agenda: Display comprehensive trip planning
+  - Real-time Currency Exchange: THB ↔ JPY conversion
+  - Location Services: Maps and nearby points of interest
+  - Popular Locations: Discover trending spots in your vicinity
+- **Smart Notifications**: Timely reminders for next destinations
+- **Interactive UI**: Loading animations for better user experience
+- **Multilingual Support**: Japanese language integration for orders and payments
+- **AI-Powered Responses**: Integration with Gemini 1.5/2.0 for real-time internet access
+- Trip Planning: Manage and display travel agendas.
+- Currency Exchange: Get live THB ↔ JPY exchange rates using Gemini API.
+- Nearby Locations: Find maps and popular spots around you.
+- Rich Menu: Interactive options for easy navigation.
+- Reminders: Notify users when to move to their next destination.
+- Animations: Enhance user experience during wait times.
+
+## Tech Stack
+
+- **Backend**:
+  - Elysia.js with Bun runtime for high-performance webhook handling
+  - Environment-based configuration (.env.local, .env.dev, .env)
+  - Port configuration (default: 3001)
+- **Frontend**:
+  - Next.js 15 (App Router) for modern, responsive UI
+- **Database**:
+  - PostgreSQL for reliable data persistence
+- **AI Integration**:
+  - Google Gemini API for intelligent responses and real-time data
+- **External APIs**:
+  - LINE Messaging API
+  - Currency Exchange API
+  - Maps and Location Services
+- Elysia.js (via Bun) for webhooks and APIs.
+- Next.js 15 (App Router).
+- Postgres DB for secure data storage.
+- Gemini API for real-time internet access.
+
+## Security
+
 Tokens and port numbers stored securely using .env files.
 Encrypted communication and database protection.
-This chatbot combines practicality with innovation, making it a perfect travel assistant. 
 
 ## Getting Started
 
@@ -47,24 +73,32 @@ src/
 ├── config/
 │   ├── app.config.ts         # Application configuration
 │   └── line.config.ts        # LINE bot configuration
-├── constants/                # Application constants
+├── constants/
+│   └── agenda.constant.ts    # Agenda-related constants
 ├── controllers/
+│   └── webhookController.ts  # LINE webhook handling logic
 │   └── healthController.ts   # Logic for health check
-├── interfaces/              # Interface definitions
+├── interfaces/
+│   └── agenda.interface.ts   # Type definitions for agenda
+│   └── line-event.interface.ts # LINE webhook event types
 ├── middleware/
 │   └── logger.ts            # Request logging middleware
-├── models/                  # Database models
+├── models/
+│   └── db.ts               # Database models and connections
+│   └── models/                  # Database models
 ├── routes/
 │   ├── health.ts           # Health check route
 │   └── webhook.ts          # LINE webhook handler
 ├── services/
+│   ├── gemini.service.ts   # Gemini AI integration
 │   ├── ai.service.ts       # AI service integration (Gemini, OpenAI)
 │   ├── exchange.service.ts # Currency exchange service
-│   └── places.service.ts   # Places and location service
+│   └── places.service.ts   # Location and mapping services
 ├── types/
 │   ├── index.ts            # Type definitions exports
-│   └── line-event.interface.ts # LINE webhook event types
 ├── utils/
+│   ├── quick-reply.ts      # Quick reply message utilities
+│   ├── flex-message.ts     # Flex message formatting
 │   └── response.ts         # Utility functions for API responses
 └── index.ts               # Main application entry point
 ```
