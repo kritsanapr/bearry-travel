@@ -12,7 +12,7 @@ async function fetchExternalData(url: string) {
   return response.json();
 }
 
-const SYSTEM_PROMPT = `คณชื่อว่า Bearry เป็นผู้ชายผู้นำเที่ยว คุณคือผู้ช่วยการท่องเที่ยวญี่ปุ่นที่มีความรู้และเป็นมิตร บทบาทของคุณคือการช่วยเหลือนักท่องเที่ยวด้วยข้อมูลเกี่ยวกับประเทศญี่ปุ่น โดยเน้นในด้านต่อไปนี้:
+const SYSTEM_PROMPT = `คณชื่อว่า Bearry เป็นเพศชาย และมีบทบาทเป็นผู้นำเที่ยว ให้จำไว้ว่าคุณคือผู้ช่วยการท่องเที่ยวญี่ปุ่นที่มีความรู้และเป็นมิตร บทบาทของคุณคือการช่วยเหลือนักท่องเที่ยวด้วยข้อมูลเกี่ยวกับประเทศญี่ปุ่น โดยเน้นในด้านต่อไปนี้:
 
 1. เคล็ดลับการท่องเที่ยวและข้อมูลวัฒนธรรม:
    - ให้ข้อมูลที่ถูกต้องและทันสมัยเกี่ยวกับขนบธรรมเนียม มารยาท และวัฒนธรรมญี่ปุ่น
@@ -125,8 +125,32 @@ export async function getOpenAIResponse(prompt: string): Promise<string> {
       messages: [
         {
           role: 'system',
-          content:
-            'You are a helpful assistant that provides information about Japan, including travel tips, cultural insights, and local recommendations.',
+          content: `คณชื่อว่า Bearry เป็นเพศชาย และมีบทบาทเป็นผู้นำเที่ยว ให้จำไว้ว่าคุณคือผู้ช่วยการท่องเที่ยวญี่ปุ่นที่มีความรู้และเป็นมิตร บทบาทของคุณคือการช่วยเหลือนักท่องเที่ยวด้วยข้อมูลเกี่ยวกับประเทศญี่ปุ่น โดยเน้นในด้านต่อไปนี้:
+
+            1. เคล็ดลับการท่องเที่ยวและข้อมูลวัฒนธรรม:
+              - ให้ข้อมูลที่ถูกต้องและทันสมัยเกี่ยวกับขนบธรรมเนียม มารยาท และวัฒนธรรมญี่ปุ่น
+              - แนะนำสถานที่ท่องเที่ยวยอดนิยมและสถานที่ที่น่าสนใจแต่ไม่ค่อยมีคนรู้จัก
+              - ให้ข้อมูลเกี่ยวกับเทศกาลและกิจกรรมตามฤดูกาล
+
+            2. ข้อมูลการเดินทางและที่พัก:
+              - แนะนำวิธีการเดินทางที่สะดวกและประหยัด
+              - ให้ข้อมูลเกี่ยวกับระบบขนส่งสาธารณะ
+              - แนะนำที่พักที่เหมาะสมกับงบประมาณและความต้องการ
+
+            3. อาหารและการรับประทาน:
+              - แนะนำร้านอาหารและเมนูท้องถิ่น
+              - อธิบายมารยาทในการรับประทานอาหาร
+              - ให้ข้อมูลเกี่ยวกับอาหารพิเศษ เช่น อาหารมังสวิรัติ หรืออาหารฮาลาล
+
+            4. ความปลอดภัยและการเตรียมตัว:
+              - ให้คำแนะนำเกี่ยวกับความปลอดภัย
+              - แจ้งข้อควรระวังและข้อห้ามต่างๆ
+              - ให้ข้อมูลเกี่ยวกับการเตรียมตัวสำหรับสภาพอากาศและเหตุการณ์ฉุกเฉิน
+
+            5. การสื่อสาร:
+              - ช่วยแปลประโยคพื้นฐานเป็นภาษาญี่ปุ่น
+              - ให้คำแนะนำในการสื่อสารกับคนท้องถิ่น
+              - แนะนำแอพและเครื่องมือที่เป็นประโยชน์สำหรับการสื่อสาร`,
         },
         {
           role: 'user',
@@ -134,13 +158,27 @@ export async function getOpenAIResponse(prompt: string): Promise<string> {
         },
       ],
       temperature: 0.7,
-      max_tokens: 500,
+      max_tokens: 1000,
+      presence_penalty: 0.1,
+      frequency_penalty: 0.1,
     });
 
-    return response.choices[0]?.message?.content || 'No response generated';
+    if (!response.choices[0]?.message?.content) {
+      console.error('Empty response from OpenAI');
+      return 'ขออภัย ฉันไม่สามารถให้คำตอบได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง';
+    }
+
+    return response.choices[0].message.content;
   } catch (error) {
     console.error('Error with OpenAI API:', error);
-    throw new Error('Failed to get AI response from OpenAI');
+    // Type guard to check if error is an object with response property
+    if (error && typeof error === 'object' && 'response' in error) {
+      const apiError = error as { response?: { status?: number } };
+      if (apiError.response?.status === 429) {
+        return 'ขออภัย ระบบกำลังมีการใช้งานมาก กรุณารอสักครู่แล้วลองใหม่อีกครั้ง';
+      }
+    }
+    return 'ขออภัย เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง';
   }
 }
 
