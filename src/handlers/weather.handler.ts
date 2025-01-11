@@ -1,4 +1,5 @@
 import { LineEvent } from '../types/line-event.interface';
+import { FlexMessage } from '../types/line-flex-message.interface';
 import { lineClient } from '../config/line.config';
 import { getWeatherForecast } from '../services/weather.service';
 import { getUserLocation } from '../services/location.service';
@@ -19,133 +20,114 @@ export async function handleWeatherForecast(event: LineEvent) {
       userLocation.longitude
     );
 
-    const flexMessage = {
-      type: 'flex' as const,
-      altText: 'พยากรณ์อากาศ',
+    const flexMessage: FlexMessage = {
+      type: 'flex',
+      altText: 'Weather Forecast',
       contents: {
-        type: 'bubble' as const,
+        type: 'bubble',
         body: {
-          type: 'box' as const,
-          layout: 'vertical' as const,
+          type: 'box',
+          layout: 'vertical',
           contents: [
             {
-              type: 'text' as const,
-              text: 'พยากรณ์อากาศ',
-              weight: 'bold' as const,
-              size: 'xl' as const,
+              type: 'text',
+              text: 'Weather Forecast',
+              weight: 'bold',
+              size: 'xl',
+              align: 'center',
+              color: '#1DB446',
             },
             {
-              type: 'box' as const,
-              layout: 'vertical' as const,
-              margin: 'lg' as const,
-              spacing: 'sm' as const,
+              type: 'box',
+              layout: 'vertical',
+              margin: 'lg',
               contents: [
                 {
-                  type: 'box' as const,
-                  layout: 'baseline' as const,
-                  spacing: 'sm' as const,
-                  contents: [
-                    {
-                      type: 'text' as const,
-                      text: '🌡️',
-                      size: 'sm' as const,
-                      color: '#AAAAAA',
-                      flex: 1,
-                    },
-                    {
-                      type: 'text' as const,
-                      text: `อุณหภูมิ: ${forecast.temp}°C`,
-                      size: 'sm' as const,
-                      color: '#666666',
-                      flex: 5,
-                    },
-                  ],
+                  type: 'text',
+                  text: '📍 พยากรณ์อากาศในพื้นที่',
+                  size: 'sm',
+                  color: '#666666',
+                  align: 'center',
                 },
                 {
-                  type: 'box' as const,
-                  layout: 'baseline' as const,
-                  spacing: 'sm' as const,
+                  type: 'text',
+                  text: `${userLocation.address || 'Unknown Location'}`,
+                  size: 'sm',
+                  color: '#666666',
+                  align: 'center',
+                  wrap: true,
+                },
+              ],
+            },
+            {
+              type: 'text',
+              text: `${forecast.temp}°C`,
+              size: '3xl',
+              weight: 'bold',
+              align: 'center',
+              margin: 'lg',
+            },
+            {
+              type: 'text',
+              text: forecast.description,
+              size: 'md',
+              align: 'center',
+              color: '#666666',
+              wrap: true,
+              margin: 'sm',
+            },
+            {
+              type: 'box',
+              layout: 'vertical',
+              margin: 'lg',
+              spacing: 'sm',
+              contents: [
+                {
+                  type: 'box',
+                  layout: 'baseline',
                   contents: [
                     {
-                      type: 'text' as const,
+                      type: 'text',
                       text: '💨',
-                      size: 'sm' as const,
-                      color: '#AAAAAA',
                       flex: 1,
                     },
                     {
-                      type: 'text' as const,
+                      type: 'text',
                       text: `ความเร็วลม: ${forecast.windSpeed} m/s`,
-                      size: 'sm' as const,
-                      color: '#666666',
                       flex: 5,
+                      color: '#666666',
                     },
                   ],
                 },
                 {
-                  type: 'box' as const,
-                  layout: 'baseline' as const,
-                  spacing: 'sm' as const,
+                  type: 'box',
+                  layout: 'baseline',
                   contents: [
                     {
-                      type: 'text' as const,
+                      type: 'text',
                       text: '💧',
-                      size: 'sm' as const,
-                      color: '#AAAAAA',
                       flex: 1,
                     },
                     {
-                      type: 'text' as const,
+                      type: 'text',
                       text: `ความชื้น: ${forecast.humidity}%`,
-                      size: 'sm' as const,
-                      color: '#666666',
                       flex: 5,
-                    },
-                  ],
-                },
-                {
-                  type: 'box' as const,
-                  layout: 'baseline' as const,
-                  spacing: 'sm' as const,
-                  contents: [
-                    {
-                      type: 'text' as const,
-                      text: '🌤️',
-                      size: 'sm' as const,
-                      color: '#AAAAAA',
-                      flex: 1,
-                    },
-                    {
-                      type: 'text' as const,
-                      text: `สภาพอากาศ: ${forecast.description}`,
-                      size: 'sm' as const,
                       color: '#666666',
-                      flex: 5,
-                      wrap: true,
                     },
                   ],
                 },
               ],
             },
             {
-              type: 'box' as const,
-              layout: 'vertical' as const,
-              margin: 'lg' as const,
-              contents: [
-                {
-                  type: 'text' as const,
-                  text: `อัพเดทล่าสุด: ${new Date().toLocaleString('th-TH')}`,
-                  size: 'xxs' as const,
-                  color: '#AAAAAA',
-                },
-              ],
+              type: 'text',
+              text: `อัพเดทล่าสุด: ${new Date().toLocaleString('th-TH')}`,
+              size: 'xxs',
+              color: '#AAAAAA',
+              align: 'center',
+              margin: 'lg',
             },
           ],
-        },
-        styles: {
-          body: {
-            backgroundColor: '#FFFFFF',
-          },
+          paddingAll: '20px',
         },
       },
     };

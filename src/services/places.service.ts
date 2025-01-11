@@ -12,28 +12,30 @@ export async function findNearbyRestaurants(
   longitude: number
 ): Promise<Place[]> {
   try {
+    // Using Mapbox Places API
     const response = await axios.get(
-      `https://maps.googleapis.com/maps/api/place/nearbysearch/json`,
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/restaurant.json`,
       {
         params: {
-          location: `${latitude},${longitude}`,
-          radius: '1000', // 1km radius
-          type: 'restaurant',
-          key: process.env.GOOGLE_MAPS_API_KEY,
+          proximity: `${longitude},${latitude}`, // Note: Mapbox uses longitude,latitude order
+          access_token: process.env.MAPBOX_ACCESS_TOKEN,
+          limit: 5,
           language: 'ja', // Japanese results
+          types: 'poi',
+          bbox: getBoundingBox(latitude, longitude, 1), // 1km radius
         },
       }
     );
 
-    return response.data.results.slice(0, 5).map((place: any) => ({
-      name: place.name,
-      address: place.vicinity,
-      rating: place.rating || 'N/A',
+    return response.data.features.map((place: any) => ({
+      name: place.text,
+      address: place.place_name,
+      rating: 'N/A', // Mapbox doesn't provide ratings
       distance: calculateDistance(
         latitude,
         longitude,
-        place.geometry.location.lat,
-        place.geometry.location.lng
+        place.center[1], // Latitude
+        place.center[0] // Longitude
       ),
     }));
   } catch (error) {
@@ -67,4 +69,16 @@ function calculateDistance(
 
 function deg2rad(deg: number): number {
   return deg * (Math.PI / 180);
+}
+
+function getBoundingBox(lat: number, lon: number, radiusKm: number): string {
+  const latRadian = deg2rad(lat);
+  const degLatKm = 110.574; // km per degree of latitude
+  const degLonKm = 111.32 * Math.cos(latRadian); // km per degree of longitude
+
+  const deltaLat = radiusKm / degLatKm;
+  const deltaLon = radiusKm / degLonKm;
+
+  // Return as minLon,minLat,maxLon,maxLat
+  return `${lon - deltaLon},${lat - deltaLat},${lon + deltaLon},${lat + deltaLat}`;
 }

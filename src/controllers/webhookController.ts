@@ -28,7 +28,11 @@ export const webhookController = async (
 
         if (text.match(/(円|¥|jpy|เยน)/i)) {
           await handleExchangeRate(event);
-        } else if (text.includes('ร้านอาหาร') || text.includes('restaurant')) {
+        } else if (
+          text.includes('ร้านอาหาร') ||
+          text.includes('restaurant') ||
+          text.includes('ตำแหน่งปัจจุบัน')
+        ) {
           await handleRestaurantSearch(event);
           await lineClient.replyMessage(event.replyToken, {
             type: 'text',
@@ -82,6 +86,21 @@ export const webhookController = async (
           text.includes('อากาศ')
         ) {
           await handleWeatherForecast(event);
+        } else if (text.includes('คู่มือ') || text.includes('help')) {
+          await lineClient.replyMessage(event.replyToken, {
+            type: 'text',
+            text:
+              `📱 คู่มือการใช้งาน\n\n` +
+              `คุณสามารถใช้คําสั่งดังนี้:\n\n` +
+              `1️⃣ แปลงค่าเงินเยน\n` +
+              `   - พิมพ์จำนวนเงินตามด้วย 円 หรือ JPY\n\n` +
+              `2️⃣ ค้นหาร้านอาหารใกล้เคียง\n` +
+              `   - แชร์โลเคชั่นของคุณ\n\n` +
+              `3️⃣ ถามข้อมูลเกี่ยวกับญี่ปุ่น\n` +
+              `   - ถามได้เลย\n\n` +
+              `4️⃣ ใช้ Gemini AI\n` +
+              `   - พิมพ์ gemini ตามด้วยคำถาม`,
+          });
         } else {
           await handleAIQuery(event);
         }

@@ -20,8 +20,101 @@ export async function handleExchangeRate(event: LineEvent) {
     const thbAmount = (amount * rate.rate).toFixed(2);
 
     await lineClient.replyMessage(event.replyToken, {
-      type: 'text',
-      text: `${amount} เยน = ${thbAmount} บาท\n(อัตราแลกเปลี่ยน: 1 เยน = ${rate.rate.toFixed(4)} บาท)\nอัพเดทล่าสุด: ${new Date(rate.timestamp).toLocaleString('th-TH')}`,
+      type: 'flex',
+      altText: `${amount} เยน = ${thbAmount} บาท`,
+      contents: {
+        type: 'bubble',
+        body: {
+          type: 'box',
+          layout: 'vertical',
+          contents: [
+            {
+              type: 'text',
+              text: '💹 อัตราแลกเปลี่ยน',
+              weight: 'bold',
+              size: 'xl',
+              align: 'center',
+              color: '#27ACB2'
+            },
+            {
+              type: 'box',
+              layout: 'horizontal',
+              margin: 'lg',
+              contents: [
+                {
+                  type: 'box',
+                  layout: 'vertical',
+                  contents: [
+                    {
+                      type: 'text',
+                      text: '¥',
+                      size: 'sm',
+                      color: '#27ACB2'
+                    },
+                    {
+                      type: 'text',
+                      text: `${amount.toLocaleString()}`,
+                      size: '3xl',
+                      weight: 'bold',
+                      color: '#27ACB2'
+                    }
+                  ]
+                },
+                {
+                  type: 'text',
+                  text: '=',
+                  size: 'xl',
+                  align: 'center',
+                  gravity: 'center',
+                  color: '#666666'
+                },
+                {
+                  type: 'box',
+                  layout: 'vertical',
+                  contents: [
+                    {
+                      type: 'text',
+                      text: '฿',
+                      size: 'sm',
+                      color: '#1DB446'
+                    },
+                    {
+                      type: 'text',
+                      text: `${Number(thbAmount).toLocaleString()}`,
+                      size: '3xl',
+                      weight: 'bold',
+                      color: '#1DB446'
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              type: 'box',
+              layout: 'vertical',
+              margin: 'xxl',
+              spacing: 'sm',
+              contents: [
+                {
+                  type: 'text',
+                  text: `อัตราแลกเปลี่ยน: 1 เยน = ${rate.rate.toFixed(4)} บาท`,
+                  size: 'sm',
+                  color: '#666666',
+                  align: 'center'
+                },
+                {
+                  type: 'text',
+                  text: `อัพเดทล่าสุด: ${new Date(rate.timestamp).toLocaleString('th-TH')}`,
+                  size: 'xxs',
+                  color: '#AAAAAA',
+                  align: 'center'
+                }
+              ]
+            }
+          ],
+          paddingAll: '20px'
+        }
+      }
     });
   } catch (error) {
     console.error('Exchange rate error:', error);

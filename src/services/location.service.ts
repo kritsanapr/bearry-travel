@@ -19,15 +19,18 @@ export async function getUserLocation(userId: string): Promise<UserLocation> {
     }
 
     // If no cached location, get user's profile to get their language setting
-    const response = await axios.get(`https://api.line.me/v2/bot/profile/${userId}`, {
-      headers: {
-        Authorization: `Bearer ${process.env.CHANNEL_ACCESS_TOKEN}`,
-      },
-    });
+    const response = await axios.get(
+      `https://api.line.me/v2/bot/profile/${userId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.CHANNEL_ACCESS_TOKEN}`,
+        },
+      }
+    );
 
     // Use IP Geolocation as fallback (you might want to use a different service in production)
     const geoResponse = await axios.get('http://ip-api.com/json');
-    
+
     const location: UserLocation = {
       name: 'Current Location',
       address: geoResponse.data.city + ', ' + geoResponse.data.country,
@@ -46,7 +49,7 @@ export async function getUserLocation(userId: string): Promise<UserLocation> {
 }
 
 export function updateUserLocation(
-  userId: string, 
+  userId: string,
   location: UserLocation
 ): void {
   userLocations.set(userId, location);
