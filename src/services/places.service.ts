@@ -3,7 +3,7 @@ import axios from 'axios';
 interface Place {
   name: string;
   address: string;
-  rating: number;
+  rating: string;
   distance: string;
 }
 
@@ -12,6 +12,8 @@ export async function findNearbyRestaurants(
   longitude: number
 ): Promise<Place[]> {
   try {
+    console.log('Searching for restaurants at:', { latitude, longitude });
+    
     // Using Mapbox Places API
     const response = await axios.get(
       `https://api.mapbox.com/geocoding/v5/mapbox.places/restaurant.json`,
@@ -27,9 +29,14 @@ export async function findNearbyRestaurants(
       }
     );
 
-    return response.data.features.map((place: any) => ({
-      name: place.text,
-      address: place.place_name,
+    if (!response.data?.features?.length) {
+      console.log('No restaurants found');
+      return [];
+    }
+
+    const restaurants = response.data.features.map((place: any) => ({
+      name: place.text || 'Unknown Restaurant',
+      address: place.place_name || 'No address available',
       rating: 'N/A', // Mapbox doesn't provide ratings
       distance: calculateDistance(
         latitude,
@@ -38,6 +45,9 @@ export async function findNearbyRestaurants(
         place.center[0] // Longitude
       ),
     }));
+
+    console.log('Found restaurants:', restaurants);
+    return restaurants;
   } catch (error) {
     console.error('Error finding nearby restaurants:', error);
     throw new Error('Failed to find nearby restaurants');

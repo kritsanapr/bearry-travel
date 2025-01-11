@@ -55,7 +55,15 @@ export async function handleRestaurantSearch(event: LineEvent) {
       location.longitude
     );
 
-    console.log(restaurants);
+    console.log('Found restaurants:', restaurants);
+
+    if (!restaurants.length) {
+      await lineClient.replyMessage(event.replyToken, {
+        type: 'text',
+        text: 'ไม่พบร้านอาหารในบริเวณใกล้เคียง',
+      });
+      return;
+    }
 
     await lineClient.replyMessage(event.replyToken, {
       type: 'flex',
@@ -63,120 +71,44 @@ export async function handleRestaurantSearch(event: LineEvent) {
       contents: {
         type: 'bubble',
         body: {
-          type: 'box',
-          layout: 'vertical',
+          type: 'box' as const,
+          layout: 'vertical' as const,
           contents: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: '🍜 ร้านอาหารใกล้เคียง',
-              weight: 'bold',
+              weight: 'bold' as const,
               size: 'xl',
-              align: 'center',
-              color: '#27ACB2',
             },
-            {
-              type: 'box',
-              layout: 'vertical',
+            ...restaurants.map((restaurant) => ({
+              type: 'box' as const,
+              layout: 'vertical' as const,
               margin: 'lg',
-              spacing: 'sm',
-              contents: restaurants.map((restaurant, index) => ({
-                type: 'box',
-                layout: 'vertical',
-                margin: index === 0 ? undefined : 'lg',
-                contents: [
-                  {
-                    type: 'box',
-                    layout: 'horizontal',
-                    contents: [
-                      {
-                        type: 'text',
-                        text: `${index + 1}`,
-                        size: 'sm',
-                        color: '#27ACB2',
-                        flex: 1,
-                      },
-                      {
-                        type: 'text',
-                        text: restaurant.name,
-                        size: 'md',
-                        color: '#111111',
-                        weight: 'bold',
-                        flex: 9,
-                        wrap: true,
-                      },
-                    ],
-                  },
-                  {
-                    type: 'box',
-                    layout: 'vertical',
-                    spacing: 'sm',
-                    margin: 'sm',
-                    contents: [
-                      {
-                        type: 'box',
-                        layout: 'baseline',
-                        contents: [
-                          {
-                            type: 'text',
-                            text: '📍',
-                            flex: 1,
-                            size: 'sm',
-                          },
-                          {
-                            type: 'text',
-                            text: restaurant.address,
-                            size: 'sm',
-                            color: '#666666',
-                            flex: 9,
-                            wrap: true,
-                          },
-                        ],
-                      },
-                      {
-                        type: 'box',
-                        layout: 'baseline',
-                        contents: [
-                          {
-                            type: 'text',
-                            text: '⭐',
-                            flex: 1,
-                            size: 'sm',
-                          },
-                          {
-                            type: 'text',
-                            text: `${restaurant.rating}`,
-                            size: 'sm',
-                            color: '#666666',
-                            flex: 9,
-                          },
-                        ],
-                      },
-                      {
-                        type: 'box',
-                        layout: 'baseline',
-                        contents: [
-                          {
-                            type: 'text',
-                            text: '📏',
-                            flex: 1,
-                            size: 'sm',
-                          },
-                          {
-                            type: 'text',
-                            text: restaurant.distance,
-                            size: 'sm',
-                            color: '#666666',
-                            flex: 9,
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              })),
-            },
+              contents: [
+                {
+                  type: 'text' as const,
+                  text: restaurant.name,
+                  weight: 'bold' as const,
+                  wrap: true,
+                },
+                {
+                  type: 'text' as const,
+                  text: `📍 ${restaurant.address}`,
+                  size: 'sm',
+                  color: '#666666',
+                  wrap: true,
+                  margin: 'sm',
+                },
+                {
+                  type: 'text' as const,
+                  text: `🚶 ${restaurant.distance}`,
+                  size: 'sm',
+                  color: '#666666',
+                  margin: 'sm',
+                },
+              ],
+            })),
           ],
-          paddingAll: '20px',
         },
       },
     });
