@@ -36,7 +36,7 @@ export async function handleAIQuery(event: LineEvent) {
 
 export async function handleImageAnalysis(event: LineEvent) {
   try {
-    if (!event.message?.image) {
+    if (!event.message || event.message.type !== 'image') {
       await lineClient.replyMessage(event.replyToken, {
         type: 'text',
         text: 'กรุณาส่งรูปภาพที่ต้องการวิเคราะห์',

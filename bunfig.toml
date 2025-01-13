@@ -1,0 +1,8 @@
+[build]
+target = "node"
+minify = true
+sourcemap = "external"
+
+[build.commonjs]
+# Enable CommonJS module support
+enable = true
