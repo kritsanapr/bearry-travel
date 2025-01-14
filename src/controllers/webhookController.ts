@@ -13,6 +13,8 @@ import {
   createQuickReplyDateMessage,
   createQuickReplyMessage,
 } from '../utils/quick-reply';
+import { FLIGHTS_NUMBER } from '../constants/flight';
+import { handleFlightInfo } from '../handlers/flight.handler';
 
 export const webhookController = async (
   events: LineEvent[],
@@ -101,6 +103,34 @@ export const webhookController = async (
               `4️⃣ ใช้ Gemini AI\n` +
               `   - พิมพ์ gemini ตามด้วยคำถาม`,
           });
+        } else if (text.startsWith('flight:')) {
+          const [_, flightType] = text.split(':');
+          if (flightType === 'departure' || flightType === 'arrival') {
+            await handleFlightInfo(event, flightType);
+          } else {
+            await lineClient.replyMessage(event.replyToken, {
+              type: 'text',
+              text: 'ขออภัย ไม่พบข้อมูลเที่ยวบินที่ต้องการ',
+            });
+          }
+        } else if (
+          text.toLowerCase().includes('bkk to nrt') ||
+          text === 'ขาออก' ||
+          text.toLowerCase().includes('bangkok to narita')
+        ) {
+          await handleFlightInfo(event, 'departure');
+        } else if (
+          text.toLowerCase().includes('nrt to bkk') ||
+          text === 'ขาเข้า' ||
+          text.toLowerCase().includes('narita to bangkok')
+        ) {
+          await handleFlightInfo(event, 'arrival');
+        } else if (
+          text === 'ดูเที่ยวบิน' ||
+          (text.toLowerCase().includes('flight') && !text.includes(':')) ||
+          text.includes('เที่ยวบิน')
+        ) {
+          await handleFlightInfo(event);
         } else {
           await handleAIQuery(event);
         }
